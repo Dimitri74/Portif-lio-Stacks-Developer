@@ -159,5 +159,44 @@ class FormularioServiceTest {
         assertEquals("Praça da Sé", atualizado.getLogradouro());
         assertEquals("SP", atualizado.getUf());
     }
+
+    @Test
+    void deveLancarConflictAoCriarComEmailDuplicado() {
+        FormularioDTO formularioDTO = FormularioDTO.builder()
+                .nome("Marcus")
+                .email("marcus@email.com")
+                .cep("01001000")
+                .build();
+
+        when(formularioRepository.existsByEmail("marcus@email.com")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> formularioService.criar(formularioDTO));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    }
+
+    @Test
+    void deveLancarConflictAoAtualizarComEmailDeOutroFormulario() {
+        Formulario existente = Formulario.builder()
+                .id("1")
+                .nome("Marcus")
+                .email("antigo@email.com")
+                .build();
+
+        FormularioDTO atualizacao = FormularioDTO.builder()
+                .nome("Marcus")
+                .email("duplicado@email.com")
+                .cep("01001000")
+                .build();
+
+        when(formularioRepository.findById("1")).thenReturn(Optional.of(existente));
+        when(formularioRepository.existsByEmailAndIdNot("duplicado@email.com", "1")).thenReturn(true);
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> formularioService.atualizar("1", atualizacao));
+
+        assertEquals(HttpStatus.CONFLICT, ex.getStatusCode());
+    }
 }
 

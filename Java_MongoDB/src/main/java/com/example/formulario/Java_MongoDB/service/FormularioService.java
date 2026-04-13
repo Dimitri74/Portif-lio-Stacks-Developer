@@ -1,8 +1,10 @@
 package com.example.formulario.Java_MongoDB.service;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,8 +27,12 @@ public class FormularioService {
 	private final ViaCepClient viaCepClient;
 
 	public FormularioDTO criar(FormularioDTO formularioDTO) {
+		String emailNormalizado = normalizarEmail(formularioDTO.getEmail());
+		validarEmailUnicoParaCriacao(emailNormalizado);
+		formularioDTO.setEmail(emailNormalizado);
+
 		FormularioDTO formularioEnriquecido = enriquecerComCep(formularioDTO);
-		Formulario salvo = formularioRepository.save(toEntity(formularioEnriquecido));
+		Formulario salvo = salvarComTratamentoDeEmailDuplicado(toEntity(formularioEnriquecido));
 		return toDTO(salvo);
 	}
 
@@ -68,6 +74,10 @@ public class FormularioService {
 	public FormularioDTO atualizar(String id, FormularioDTO formularioDTO) {
 		Formulario existente = formularioRepository.findById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Formulario nao encontrado"));
+		String emailNormalizado = normalizarEmail(formularioDTO.getEmail());
+		validarEmailUnicoParaAtualizacao(emailNormalizado, id);
+		formularioDTO.setEmail(emailNormalizado);
+
 		FormularioDTO formularioEnriquecido = enriquecerComCep(formularioDTO);
 
 		existente.setNome(formularioEnriquecido.getNome());
@@ -86,7 +96,7 @@ public class FormularioService {
 		existente.setDdd(formularioEnriquecido.getDdd());
 		existente.setSiafi(formularioEnriquecido.getSiafi());
 
-		Formulario atualizado = formularioRepository.save(existente);
+		Formulario atualizado = salvarComTratamentoDeEmailDuplicado(existente);
 		return toDTO(atualizado);
 	}
 
@@ -139,6 +149,33 @@ public class FormularioService {
 			return valorFormulario;
 		}
 		return valorViaCep;
+	}
+
+	private String normalizarEmail(String email) {
+		if (email == null || email.isBlank()) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email obrigatorio");
+		}
+		return email.trim().toLowerCase(Locale.ROOT);
+	}
+
+	private void validarEmailUnicoParaCriacao(String email) {
+		if (formularioRepository.existsByEmail(email)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ja cadastrado");
+		}
+	}
+
+	private void validarEmailUnicoParaAtualizacao(String email, String idAtual) {
+		if (formularioRepository.existsByEmailAndIdNot(email, idAtual)) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ja cadastrado");
+		}
+	}
+
+	private Formulario salvarComTratamentoDeEmailDuplicado(Formulario formulario) {
+		try {
+			return formularioRepository.save(formulario);
+		} catch (DuplicateKeyException ex) {
+			throw new ResponseStatusException(HttpStatus.CONFLICT, "Email ja cadastrado", ex);
+		}
 	}
 
 	private FormularioDTO toDTO(Formulario formulario) {

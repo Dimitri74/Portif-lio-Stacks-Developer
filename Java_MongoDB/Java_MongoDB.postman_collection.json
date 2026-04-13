@@ -1,0 +1,541 @@
+{
+  "info": {
+    "_postman_id": "9f013f87-d8ff-4ccb-b84a-6f18fdcd5f93",
+    "name": "Java MongoDB - Formulario API",
+    "description": "Collection completa para testar CRUD de formularios e consulta de CEP via ViaCEP.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "01 - Buscar Endereco por CEP",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/cep/{{cep}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "cep",
+            "{{cep}}"
+          ]
+        },
+        "description": "Consulta endereco no ViaCEP sem salvar no MongoDB."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna campos basicos de endereco', function () {",
+              "    pm.expect(data).to.have.property('cep');",
+              "    pm.expect(data).to.have.property('logradouro');",
+              "    pm.expect(data).to.have.property('localidade');",
+              "    pm.expect(data).to.have.property('uf');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Criar Formulario Principal",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Marcus Dimitri\",\n  \"email\": \"{{emailPrincipal}}\",\n  \"cep\": \"{{cep}}\",\n  \"complemento\": \"Apto 42\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios"
+          ]
+        },
+        "description": "Cria formulario principal, enriquece endereco via ViaCEP e salva no MongoDB."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna id do formulario criado', function () {",
+              "    pm.expect(data).to.have.property('id');",
+              "    pm.expect(data.id).to.be.a('string').and.not.empty;",
+              "});",
+              "pm.test('Retorna email normalizado', function () {",
+              "    pm.expect(data.email).to.eql(pm.collectionVariables.get('emailPrincipal'));",
+              "});",
+              "",
+              "pm.collectionVariables.set('id', data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Negativo Criar Formulario com Email Duplicado (409)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Outro Usuario\",\n  \"email\": \"{{emailPrincipal}}\",\n  \"cep\": \"{{cep}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios"
+          ]
+        },
+        "description": "Valida a regra de um formulario por email."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna payload amigavel de erro', function () {",
+              "    pm.expect(data).to.have.property('timestamp');",
+              "    pm.expect(data).to.have.property('status', 409);",
+              "    pm.expect(data).to.have.property('error', 'Conflict');",
+              "    pm.expect(data).to.have.property('trace', 'Email ja cadastrado');",
+              "    pm.expect(data.trace).to.not.contain('org.springframework');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Listar Formularios",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna lista', function () {",
+              "    pm.expect(data).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - Buscar Formulario Principal por ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/{{id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "{{id}}"
+          ]
+        },
+        "description": "Executar apos o POST principal para reutilizar o id salvo automaticamente."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna mesmo id solicitado', function () {",
+              "    pm.expect(data.id).to.eql(pm.collectionVariables.get('id'));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Criar Formulario Secundario",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Usuario Secundario\",\n  \"email\": \"{{emailSecundario}}\",\n  \"cep\": \"01001000\",\n  \"complemento\": \"Casa\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios"
+          ]
+        },
+        "description": "Cria um segundo formulario para testar conflito no PUT."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna id do formulario secundario', function () {",
+              "    pm.expect(data).to.have.property('id');",
+              "    pm.expect(data.id).to.be.a('string').and.not.empty;",
+              "});",
+              "",
+              "pm.collectionVariables.set('idSecundario', data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Negativo Atualizar Formulario Secundario com Email Duplicado (409)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Usuario Secundario Atualizado\",\n  \"email\": \"{{emailPrincipal}}\",\n  \"cep\": \"01001000\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/{{idSecundario}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "{{idSecundario}}"
+          ]
+        },
+        "description": "Valida conflito ao tentar atualizar outro formulario com um email ja cadastrado."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 409', function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna payload amigavel de erro', function () {",
+              "    pm.expect(data).to.have.property('timestamp');",
+              "    pm.expect(data).to.have.property('status', 409);",
+              "    pm.expect(data).to.have.property('error', 'Conflict');",
+              "    pm.expect(data).to.have.property('trace', 'Email ja cadastrado');",
+              "    pm.expect(data.trace).to.not.contain('org.springframework');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "08 - Atualizar Formulario Principal",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Marcus Dimitri Atualizado\",\n  \"email\": \"{{emailPrincipal}}\",\n  \"cep\": \"04538133\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/{{id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "{{id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna nome atualizado', function () {",
+              "    pm.expect(data.nome).to.eql('Marcus Dimitri Atualizado');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "09 - Deletar Formulario Secundario",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/{{idSecundario}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "{{idSecundario}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 204', function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.collectionVariables.unset('idSecundario');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Deletar Formulario Principal",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/{{id}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "{{id}}"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 204', function () {",
+              "    pm.response.to.have.status(204);",
+              "});",
+              "",
+              "pm.collectionVariables.unset('id');"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Negativo CEP invalido (400)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/cep/95010A10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "cep",
+            "95010A10"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 400', function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna payload amigavel de erro', function () {",
+              "    pm.expect(data).to.have.property('timestamp');",
+              "    pm.expect(data).to.have.property('status', 400);",
+              "    pm.expect(data).to.have.property('error', 'Bad Request');",
+              "    pm.expect(data).to.have.property('trace', 'CEP invalido. Informe 8 digitos.');",
+              "    pm.expect(data.trace).to.not.contain('org.springframework');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Negativo CEP inexistente (404)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/formularios/cep/99999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "formularios",
+            "cep",
+            "99999999"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status 404', function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "var data = pm.response.json();",
+              "pm.test('Retorna payload amigavel de erro', function () {",
+              "    pm.expect(data).to.have.property('timestamp');",
+              "    pm.expect(data).to.have.property('status', 404);",
+              "    pm.expect(data).to.have.property('error', 'Not Found');",
+              "    pm.expect(data).to.have.property('trace', 'CEP nao encontrado');",
+              "    pm.expect(data.trace).to.not.contain('org.springframework');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "cep",
+      "value": "58037603"
+    },
+    {
+      "key": "emailPrincipal",
+      "value": "marcusdimitri7@gmail.com"
+    },
+    {
+      "key": "emailSecundario",
+      "value": "marcusdimitri7+secundario@gmail.com"
+    },
+    {
+      "key": "id",
+      "value": ""
+    },
+    {
+      "key": "idSecundario",
+      "value": ""
+    }
+  ]
+}
+

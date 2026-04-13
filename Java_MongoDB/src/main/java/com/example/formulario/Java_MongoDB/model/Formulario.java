@@ -1,6 +1,7 @@
 package com.example.formulario.Java_MongoDB.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +19,7 @@ public class Formulario {
     @Id
     private String id;
     private String nome;
+    @Indexed(unique = true)
     private String email;
     private String  cep;
     private String logradouro;
