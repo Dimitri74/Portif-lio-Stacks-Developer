@@ -353,7 +353,7 @@ export function FormularioDashboard() {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/70 px-4 py-2 text-xs font-medium uppercase tracking-[0.25em] text-accent-strong">
-              <Sparkles className="size-4" />
+              <Sparkles className="size-4" suppressHydrationWarning />
               Dashboard 
             </div>
             <h1 className="mt-5 max-w-3xl text-4xl font-semibold leading-tight tracking-[-0.04em] text-foreground sm:text-5xl lg:text-6xl">
@@ -386,19 +386,19 @@ export function FormularioDashboard() {
           title="Registros"
           value={String(formularios.length).padStart(2, "0")}
           helper="Total de documentos carregados do MongoDB"
-          icon={<Layers3 className="size-5" />}
+          icon={<Layers3 className="size-5" suppressHydrationWarning />}
         />
         <StatCard
           title="Cidades"
           value={String(totalCidades).padStart(2, "0")}
           helper="Cobertura territorial encontrada nos cadastros"
-          icon={<MapPinHouse className="size-5" />}
+          icon={<MapPinHouse className="size-5" suppressHydrationWarning />}
         />
         <StatCard
           title="Estados"
           value={String(totalEstados).padStart(2, "0")}
           helper="UFs diferentes enriquecidas pelo ViaCEP"
-          icon={<Building2 className="size-5" />}
+          icon={<Building2 className="size-5" suppressHydrationWarning />}
         />
       </section>
 
@@ -470,9 +470,9 @@ export function FormularioDashboard() {
                 className="animate-pulse-border inline-flex items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3 text-sm font-medium text-white hover:-translate-y-0.5 hover:bg-accent-strong disabled:cursor-wait disabled:opacity-70"
               >
                 {isLookingUpCep ? (
-                  <LoaderCircle className="size-4 animate-spin" />
+                  <LoaderCircle className="size-4 animate-spin" suppressHydrationWarning />
                 ) : (
-                  <Search className="size-4" />
+                  <Search className="size-4" suppressHydrationWarning />
                 )}
                 Buscar CEP
               </button>
@@ -502,7 +502,7 @@ export function FormularioDashboard() {
 
             <div className="rounded-[28px] border border-dashed border-line bg-white/65 p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-                <BadgeCheck className="size-4 text-accent" />
+                <BadgeCheck className="size-4 text-accent" suppressHydrationWarning />
                 Endereco enriquecido pelo backend
               </div>
 
@@ -555,11 +555,11 @@ export function FormularioDashboard() {
               className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-5 py-4 text-sm font-medium text-white hover:-translate-y-0.5 hover:bg-[#111814] disabled:cursor-wait disabled:opacity-70"
             >
               {isSaving ? (
-                <LoaderCircle className="size-4 animate-spin" />
+                <LoaderCircle className="size-4 animate-spin" suppressHydrationWarning />
               ) : selectedId ? (
-                <Save className="size-4" />
+                <Save className="size-4" suppressHydrationWarning />
               ) : (
-                <Plus className="size-4" />
+                <Plus className="size-4" suppressHydrationWarning />
               )}
               {selectedId ? "Salvar alteracoes" : "Criar formulario"}
             </button>
@@ -571,13 +571,13 @@ export function FormularioDashboard() {
             <div>
               <p className="text-sm uppercase tracking-[0.24em] text-muted">Visao operacional</p>
               <h2 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-foreground">
-                Registros ativos na collection
+                Registros ativos
               </h2>
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
               <label className="relative min-w-[240px]">
-                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" />
+                <Search className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted" suppressHydrationWarning />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
@@ -594,7 +594,7 @@ export function FormularioDashboard() {
                 }}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-line bg-white px-4 py-3 text-sm text-foreground hover:-translate-y-0.5 hover:border-accent/30"
               >
-                <RefreshCcw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />
+                <RefreshCcw className={`size-4 ${isLoading ? "animate-spin" : ""}`} suppressHydrationWarning />
                 Atualizar dados
               </button>
             </div>
@@ -602,7 +602,7 @@ export function FormularioDashboard() {
 
           <div className={`mt-5 rounded-2xl border px-4 py-3 text-sm ${noticeStyles}`}>
             <div className="flex items-start gap-3">
-              <AlertCircle className="mt-0.5 size-4 shrink-0" />
+              <AlertCircle className="mt-0.5 size-4 shrink-0" suppressHydrationWarning />
               <p className="leading-7">{notice.message}</p>
             </div>
           </div>
@@ -633,7 +633,7 @@ export function FormularioDashboard() {
                       </td>
                       <td className="px-5 py-4 align-top">
                         <div className="inline-flex items-center gap-2 text-muted">
-                          <Mail className="size-4" />
+                          <Mail className="size-4" suppressHydrationWarning />
                           {formulario.email}
                         </div>
                         <p className="mt-2 font-mono text-xs text-muted">CEP {formulario.cep}</p>
@@ -652,7 +652,7 @@ export function FormularioDashboard() {
                             onClick={() => handleEdit(formulario)}
                             className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-xs font-medium text-foreground hover:-translate-y-0.5 hover:border-accent/30"
                           >
-                            <PencilLine className="size-3.5" />
+                            <PencilLine className="size-3.5" suppressHydrationWarning />
                             Editar
                           </button>
                           <button
@@ -660,7 +660,7 @@ export function FormularioDashboard() {
                             onClick={() => handleDelete(formulario.id)}
                             className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-medium text-red-700 hover:-translate-y-0.5 hover:bg-red-100"
                           >
-                            <Trash2 className="size-3.5" />
+                            <Trash2 className="size-3.5" suppressHydrationWarning />
                             Excluir
                           </button>
                         </div>
@@ -690,7 +690,7 @@ export function FormularioDashboard() {
                       onClick={() => handleEdit(formulario)}
                       className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2 text-xs font-medium text-foreground"
                     >
-                      <PencilLine className="size-3.5" />
+                      <PencilLine className="size-3.5" suppressHydrationWarning />
                       Abrir
                     </button>
                   </div>
@@ -712,7 +712,7 @@ export function FormularioDashboard() {
                       onClick={() => handleEdit(formulario)}
                       className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-line bg-white px-4 py-3 text-sm font-medium text-foreground"
                     >
-                      <PencilLine className="size-4" />
+                      <PencilLine className="size-4" suppressHydrationWarning />
                       Editar
                     </button>
                     <button
@@ -720,7 +720,7 @@ export function FormularioDashboard() {
                       onClick={() => handleDelete(formulario.id)}
                       className="inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-4" suppressHydrationWarning />
                       Excluir
                     </button>
                   </div>
